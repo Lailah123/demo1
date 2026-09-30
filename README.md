@@ -27,6 +27,7 @@ mvn package
 | `StringUtils` | 反转、回文判断、单词计数、标题化 |
 | `FizzBuzz` | 经典 FizzBuzz 序列 |
 | `NumberUtils` | 斐波那契、质数判断、最大公约数 |
+| `AsciiArt` | 图片转 ASCII 字符画（纯文本 / 彩色 HTML / 终端 ANSI） |
 
 ### 使用示例
 
@@ -48,4 +49,9 @@ List<String> seq = FizzBuzz.upTo(15);
 // 数字工具
 long fib = NumberUtils.fibonacci(10);  // 55
 boolean prime = NumberUtils.isPrime(97); // true
+
+// 图片转 ASCII 字符画（纯文本 / 彩色 HTML / 终端 ANSI）
+String ascii = AsciiArt.toAscii(new File("photo.png"), 80);
+String html  = AsciiArt.toHtml(new File("photo.png"), 80);
+String ansi  = AsciiArt.toAnsi(new File("photo.png"), 80);
 ```
