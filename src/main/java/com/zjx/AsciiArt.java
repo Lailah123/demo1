@@ -25,6 +25,9 @@ public final class AsciiArt {
     /** 输出宽度上限，防止超大图导致内存与性能问题。 */
     private static final int MAX_WIDTH = 200;
 
+    /** 输出行数上限，防止极端窄长图导致内存与性能问题。 */
+    private static final int MAX_ROWS = 1000;
+
     /** 等宽 ASCII 字符的高宽比约为 2:1（字符高度约为宽度的两倍）。 */
     private static final double CHAR_ASPECT_RATIO = 2.0;
 
@@ -73,6 +76,8 @@ public final class AsciiArt {
     /**
      * 将输入流中的图片转换为黑白 ASCII 字符画。
      *
+     * <p>注意：本方法不会关闭传入的输入流，关闭责任由调用方承担。</p>
+     *
      * @param in    图片输入流，不能为 {@code null}
      * @param width 输出字符宽度
      * @return 以换行分隔的 ASCII 字符画
@@ -109,6 +114,34 @@ public final class AsciiArt {
     }
 
     /**
+     * 将网络图片转换为彩色 HTML 字符画。
+     *
+     * @param url   图片地址，不能为 {@code null}
+     * @param width 输出字符宽度
+     * @return 可直接嵌入网页的 HTML 片段
+     * @throws IOException              当图片读取失败时
+     * @throws IllegalArgumentException 当地址为 {@code null}、格式无法识别或宽度非法时
+     */
+    public static String toHtml(URL url, int width) throws IOException {
+        return toHtml(readImage(url), width);
+    }
+
+    /**
+     * 将输入流中的图片转换为彩色 HTML 字符画。
+     *
+     * <p>注意：本方法不会关闭传入的输入流，关闭责任由调用方承担。</p>
+     *
+     * @param in    图片输入流，不能为 {@code null}
+     * @param width 输出字符宽度
+     * @return 可直接嵌入网页的 HTML 片段
+     * @throws IOException              当图片读取失败时
+     * @throws IllegalArgumentException 当输入流为 {@code null}、格式无法识别或宽度非法时
+     */
+    public static String toHtml(InputStream in, int width) throws IOException {
+        return toHtml(readImage(in), width);
+    }
+
+    /**
      * 将图片转换为终端彩色 ANSI 字符画（使用 24 位真彩转义序列）。
      *
      * @param image 源图片，不能为 {@code null}
@@ -131,6 +164,34 @@ public final class AsciiArt {
      */
     public static String toAnsi(File file, int width) throws IOException {
         return toAnsi(readImage(file), width);
+    }
+
+    /**
+     * 将网络图片转换为终端彩色 ANSI 字符画。
+     *
+     * @param url   图片地址，不能为 {@code null}
+     * @param width 输出字符宽度
+     * @return 带 ANSI 颜色转义序列的字符串，末尾附带复位序列
+     * @throws IOException              当图片读取失败时
+     * @throws IllegalArgumentException 当地址为 {@code null}、格式无法识别或宽度非法时
+     */
+    public static String toAnsi(URL url, int width) throws IOException {
+        return toAnsi(readImage(url), width);
+    }
+
+    /**
+     * 将输入流中的图片转换为终端彩色 ANSI 字符画。
+     *
+     * <p>注意：本方法不会关闭传入的输入流，关闭责任由调用方承担。</p>
+     *
+     * @param in    图片输入流，不能为 {@code null}
+     * @param width 输出字符宽度
+     * @return 带 ANSI 颜色转义序列的字符串，末尾附带复位序列
+     * @throws IOException              当图片读取失败时
+     * @throws IllegalArgumentException 当输入流为 {@code null}、格式无法识别或宽度非法时
+     */
+    public static String toAnsi(InputStream in, int width) throws IOException {
+        return toAnsi(readImage(in), width);
     }
 
     private static BufferedImage readImage(File file) throws IOException {
@@ -175,7 +236,13 @@ public final class AsciiArt {
         int iw = image.getWidth();
         int ih = image.getHeight();
         int cols = width;
-        int rows = Math.max(1, (int) Math.round(ih * width / (CHAR_ASPECT_RATIO * iw)));
+        // 用 double 计算避免 ih * width 整数溢出；行数设上限，防止极端窄长图 OOM
+        long rowsComputed = Math.round((double) ih * width / (CHAR_ASPECT_RATIO * iw));
+        if (rowsComputed > MAX_ROWS) {
+            throw new IllegalArgumentException(
+                    "输出高度超限（上限 " + MAX_ROWS + " 行），请减小输出宽度，收到行数: " + rowsComputed);
+        }
+        int rows = (int) Math.max(1L, rowsComputed);
 
         StringBuilder sb = new StringBuilder((cols + 1) * rows);
         for (int r = 0; r < rows; r++) {
