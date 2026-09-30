@@ -20,7 +20,7 @@ class Test1Test {
     void messageIsNotNullAndNonBlank() {
         String message = Test1.message();
         assertNotNull(message, "问候语不应为 null");
-        assertFalse(message.isBlank(), "问候语不应为空");
+        assertFalse(message.trim().isEmpty(), "问候语不应为空");
     }
 
     @Test
