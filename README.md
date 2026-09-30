@@ -32,6 +32,10 @@ mvn package
 ### 使用示例
 
 ```java
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
 // 多语言问候
 String hi = Greeter.greet("张三", Greeter.Language.CHINESE); // 你好，张三！
 
@@ -51,7 +55,11 @@ long fib = NumberUtils.fibonacci(10);  // 55
 boolean prime = NumberUtils.isPrime(97); // true
 
 // 图片转 ASCII 字符画（纯文本 / 彩色 HTML / 终端 ANSI）
-String ascii = AsciiArt.toAscii(new File("photo.png"), 80);
-String html  = AsciiArt.toHtml(new File("photo.png"), 80);
-String ansi  = AsciiArt.toAnsi(new File("photo.png"), 80);
+try {
+    String ascii = AsciiArt.toAscii(new File("photo.png"), 80);
+    String html  = AsciiArt.toHtml(new File("photo.png"), 80);
+    String ansi  = AsciiArt.toAnsi(new File("photo.png"), 80);
+} catch (IOException e) {
+    // 文件读取失败时的处理
+}
 ```

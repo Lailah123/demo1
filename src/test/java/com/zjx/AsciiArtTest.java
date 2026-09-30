@@ -5,6 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+
+import javax.imageio.ImageIO;
 
 import org.junit.jupiter.api.Test;
 
@@ -113,6 +121,65 @@ class AsciiArtTest {
         assertTrue(html.startsWith("<pre>"), "HTML 输出应以 <pre> 开头");
         assertTrue(html.endsWith("</pre>"), "HTML 输出应以 </pre> 结尾");
         assertTrue(html.contains("<span style=\"color:#000000\">"), "黑色像素应对应 #000000 着色");
+    }
+
+    @Test
+    void transparentPixelsCompositeToWhite() {
+        // TYPE_INT_ARGB 初始为全透明（alpha=0），应合成到白色背景 → 最浅字符
+        BufferedImage transparent = new BufferedImage(20, 20, BufferedImage.TYPE_INT_ARGB);
+        String[] rows = lines(AsciiArt.toAscii(transparent, 10));
+        for (String row : rows) {
+            for (char c : row.toCharArray()) {
+                assertEquals(' ', c, "透明像素应合成到白色背景，映射到最浅字符");
+            }
+        }
+    }
+
+    @Test
+    void rejectsNullFileUrlStream() {
+        assertThrows(IllegalArgumentException.class, () -> AsciiArt.toAscii((File) null, 10));
+        assertThrows(IllegalArgumentException.class, () -> AsciiArt.toAscii((URL) null, 10));
+        assertThrows(IllegalArgumentException.class, () -> AsciiArt.toAscii((InputStream) null, 10));
+        assertThrows(IllegalArgumentException.class, () -> AsciiArt.toHtml((File) null, 10));
+        assertThrows(IllegalArgumentException.class, () -> AsciiArt.toHtml((URL) null, 10));
+        assertThrows(IllegalArgumentException.class, () -> AsciiArt.toHtml((InputStream) null, 10));
+        assertThrows(IllegalArgumentException.class, () -> AsciiArt.toAnsi((File) null, 10));
+        assertThrows(IllegalArgumentException.class, () -> AsciiArt.toAnsi((URL) null, 10));
+        assertThrows(IllegalArgumentException.class, () -> AsciiArt.toAnsi((InputStream) null, 10));
+    }
+
+    @Test
+    void rejectsUnrecognizedImageStream() {
+        byte[] notAnImage = "这不是图片内容".getBytes(StandardCharsets.UTF_8);
+        assertThrows(IllegalArgumentException.class,
+                () -> AsciiArt.toAscii(new ByteArrayInputStream(notAnImage), 10));
+    }
+
+    @Test
+    void oneByOneImageProducesSingleChar() {
+        assertEquals("@\n", AsciiArt.toAscii(solid(1, 1, 0x000000), 1),
+                "1x1 图在宽度 1 下应输出单个最深字符");
+    }
+
+    @Test
+    void widthOneProducesSingleColumn() {
+        String[] rows = lines(AsciiArt.toAscii(solid(10, 10, 0x000000), 1));
+        assertEquals(1, rows.length, "10x10 图在宽度 1 下应为 1 行");
+        assertEquals("@", rows[0], "宽度 1 应输出单列最深字符");
+    }
+
+    @Test
+    void streamOverloadsMatchBufferedImageOutput() throws Exception {
+        BufferedImage image = solid(20, 20, 0x000000);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", out);
+
+        assertEquals(AsciiArt.toAscii(image, 10),
+                AsciiArt.toAscii(new ByteArrayInputStream(out.toByteArray()), 10));
+        assertEquals(AsciiArt.toHtml(image, 10),
+                AsciiArt.toHtml(new ByteArrayInputStream(out.toByteArray()), 10));
+        assertEquals(AsciiArt.toAnsi(image, 10),
+                AsciiArt.toAnsi(new ByteArrayInputStream(out.toByteArray()), 10));
     }
 
     @Test
