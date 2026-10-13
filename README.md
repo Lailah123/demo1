@@ -28,6 +28,7 @@ mvn package
 | `FizzBuzz` | 经典 FizzBuzz 序列 |
 | `NumberUtils` | 斐波那契、质数判断、最大公约数 |
 | `AsciiArt` | 图片转 ASCII 字符画（纯文本 / 彩色 HTML / 终端 ANSI） |
+| `LetterArt` | 字母转字符艺术字（A-Z、0-9 与常用标点，5 行点阵 banner） |
 | `TextTable` | 文本表格渲染（中英文混排对齐、逐列对齐方式） |
 
 ### 使用示例
@@ -37,6 +38,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 // 多语言问候
 String hi = Greeter.greet("张三", Greeter.Language.CHINESE); // 你好，张三！
@@ -65,11 +67,25 @@ try {
     // 文件读取失败时的处理
 }
 
+// 字母转字符艺术字：一行文本渲染为固定 5 行大字
+System.out.println(LetterArt.render("HI"));
+// #   # #####
+// #   #   #
+// #####   #
+// #   #   #
+// #   # #####
+
+List<String> bannerLines = LetterArt.renderLines("OK", 3); // 逐行返回，不含换行符，字距 3
+Set<Character> font = LetterArt.supportedCharacters();     // 受支持字符清单
+
 // 文本表格（中英文混排也能对齐）
-List<String[]> rows = Arrays.asList(
+List<String[]> tableRows = Arrays.asList(
         new String[] {"张三", "北京", "28"},
         new String[] {"Li Lei", "Shanghai", "9"});
 String table = TextTable.render(
         new String[] {"姓名", "城市", "年龄"},
-        rows, TextTable.Align.LEFT, TextTable.Align.LEFT, TextTable.Align.RIGHT);
+        tableRows, TextTable.Align.LEFT, TextTable.Align.LEFT, TextTable.Align.RIGHT);
 ```
+
+`LetterArt` 支持的字符为 A-Z、0-9、空格与常用标点（`. , ! ? ' " - _ + = : ; ( ) [ ] /`），
+小写字母会自动转为大写；传入不支持的字符时抛出 `IllegalArgumentException`。
