@@ -30,6 +30,8 @@ mvn package
 | `AsciiArt` | 图片转 ASCII 字符画（纯文本 / 彩色 HTML / 终端 ANSI） |
 | `LetterArt` | 字母转字符艺术字（A-Z、0-9 与常用标点，5 行点阵 banner） |
 | `TextTable` | 文本表格渲染（中英文混排对齐、逐列对齐方式） |
+| `Expression` | 数学表达式求值（运算符、常量与常用函数，零依赖解析器） |
+| `Plotter` | ASCII 函数绘图（终端字符曲线、坐标轴、自动 y 轴范围） |
 
 ### 使用示例
 
@@ -85,7 +87,42 @@ List<String[]> tableRows = Arrays.asList(
 String table = TextTable.render(
         new String[] {"姓名", "城市", "年龄"},
         tableRows, TextTable.Align.LEFT, TextTable.Align.LEFT, TextTable.Align.RIGHT);
+
+// 数学表达式求值：编译一次即可反复代入不同的 x
+Expression decay = Expression.parse("sin(x) * exp(-x / 5)");
+double value = decay.evaluate(2.0);        // 0.609...
+
+// ASCII 函数绘图：在终端里画出曲线
+String curve = Plotter.plot("sin(x)", -6.5, 6.5, 50, 13);
+```
+
+`Plotter.plot("sin(x)", -6.5, 6.5, 50, 13)` 的输出：
+
+```text
+                         |
+      /--                |   /---
+    /-   \               |  /    \
+   /      \              | /      \
+  /        \             |/        \
+  |         \            /          |            /
+-/-----------\-----------|----------\-----------/-
+*             |         /|           \          |
+              \        / |            \        /
+               \      /  |             \      /
+                \    /   |              \   /-
+                 \---    |               \--
+                         |
 ```
 
 `LetterArt` 支持的字符为 A-Z、0-9、空格与常用标点（`. , ! ? ' " - _ + = : ; ( ) [ ] /`），
 小写字母会自动转为大写；传入不支持的字符时抛出 `IllegalArgumentException`。
+
+`Expression` 支持 `+ - * / %`、乘方 `^`（右结合，且 `-2^2` 等于 `-4`）、常量 `pi` 与 `e`、
+变量 `x`，以及 `sin cos tan asin acos atan sinh cosh tanh sqrt cbrt abs exp ln lg
+floor ceil round signum` 和双参数函数 `pow atan2 hypot min max`；标识符不区分大小写，
+乘号不可省略（`2x` 需写成 `2 * x`）。
+
+`Plotter` 把曲线画在 `width × height` 的字符网格上，列对应 x 轴、行对应 y 轴，
+用 `-`、`/`、`\`、`|` 表示走向；坐标轴落在画布内时会一并画出并标出原点 `+`。
+不指定 y 轴范围时按区间内的函数值自动推导；函数值超出范围或为 `NaN` / 无穷大
+（如 `1/x` 在 `x = 0` 处）的位置会断开，曲线自然出现缺口。
