@@ -15,13 +15,38 @@ mvn test
 
 # 打包
 mvn package
+
+# 直接运行主类
+mvn exec:java -Dexec.mainClass="com.zjx.Test1"
+```
+
+## 项目结构
+
+```
+demo1/
+├── pom.xml                      # Maven 构建配置（JUnit 5）
+├── README.md
+└── src/
+    ├── main/java/com/zjx/       # 主代码
+    │   ├── Test1.java            # 示例主类（hello world）
+    │   ├── Test2.java            # 占位类（暂无业务逻辑）
+    │   ├── Greeter.java          # 多语言问候
+    │   ├── Calculator.java       # 四则运算 / 阶乘 / 快速幂
+    │   ├── StringUtils.java      # 字符串工具
+    │   ├── FizzBuzz.java         # FizzBuzz 序列
+    │   ├── NumberUtils.java      # 数字工具
+    │   ├── AsciiArt.java         # 图片转 ASCII 字符画
+    │   ├── LetterArt.java        # 字母转字符艺术字
+    │   └── TextTable.java        # 文本表格渲染
+    └── test/java/com/zjx/        # 对应单元测试（*Test.java）
 ```
 
 ## 功能模块
 
 | 类 | 功能 |
 | --- | --- |
-| `Test1` | 基础问候输出 |
+| `Test1` | 示例主类：输出 `hello world!`，含 `main` 入口 |
+| `Test2` | 占位类（暂无业务逻辑） |
 | `Greeter` | 多语言问候（中/英/日/韩/西/法） |
 | `Calculator` | 四则运算、阶乘、快速幂 |
 | `StringUtils` | 反转、回文判断、单词计数、标题化 |
@@ -31,6 +56,9 @@ mvn package
 | `LetterArt` | 字母转字符艺术字（A-Z、0-9 与常用标点，5 行点阵 banner） |
 | `TextTable` | 文本表格渲染（中英文混排对齐、逐列对齐方式） |
 
+> 所有工具类均为静态方法，构造函数私有，无需实例化。
+> 项目仅依赖 JDK 标准库与 JUnit 5（测试用），无第三方运行时依赖。
+
 ### 使用示例
 
 ```java
@@ -39,6 +67,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+
+// 示例主类
+System.out.println(Test1.message()); // hello world!
 
 // 多语言问候
 String hi = Greeter.greet("张三", Greeter.Language.CHINESE); // 你好，张三！
@@ -89,3 +120,26 @@ String table = TextTable.render(
 
 `LetterArt` 支持的字符为 A-Z、0-9、空格与常用标点（`. , ! ? ' " - _ + = : ; ( ) [ ] /`），
 小写字母会自动转为大写；传入不支持的字符时抛出 `IllegalArgumentException`。
+
+`AsciiArt` 读取图片使用 `javax.imageio`，仅支持 JDK 内置可解码格式（PNG/JPG/GIF/BMP 等），无需引入第三方图像库。
+
+## 测试
+
+各功能模块均有对应的 JUnit 5 测试类，位于 `src/test/java/com/zjx/`：
+
+| 测试类 | 覆盖模块 |
+| --- | --- |
+| `Test1Test` | `Test1` |
+| `GreeterTest` | `Greeter` |
+| `CalculatorTest` | `Calculator` |
+| `StringUtilsTest` | `StringUtils` |
+| `FizzBuzzTest` | `FizzBuzz` |
+| `NumberUtilsTest` | `NumberUtils` |
+| `AsciiArtTest` | `AsciiArt` |
+| `LetterArtTest` | `LetterArt` |
+| `TextTableTest` | `TextTable` |
+
+```bash
+mvn test            # 运行全部测试
+mvn -Dtest=CalculatorTest test   # 运行单个测试类
+```
