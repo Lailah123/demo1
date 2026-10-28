@@ -30,6 +30,7 @@ mvn package
 | `AsciiArt` | 图片转 ASCII 字符画（纯文本 / 彩色 HTML / 终端 ANSI） |
 | `LetterArt` | 字母转字符艺术字（A-Z、0-9 与常用标点，5 行点阵 banner） |
 | `TextTable` | 文本表格渲染（中英文混排对齐、逐列对齐方式） |
+| `MorseCode` | 摩尔斯电码双向转换（文本编码 / 电码解码） |
 
 ### 使用示例
 
@@ -85,7 +86,15 @@ List<String[]> tableRows = Arrays.asList(
 String table = TextTable.render(
         new String[] {"姓名", "城市", "年龄"},
         tableRows, TextTable.Align.LEFT, TextTable.Align.LEFT, TextTable.Align.RIGHT);
+
+// 摩尔斯电码
+String sos = MorseCode.encode("SOS");   // ... --- ...
+String back = MorseCode.decode(sos);    // SOS
+Set<Character> morseChars = MorseCode.supportedCharacters(); // 受支持字符清单
 ```
 
 `LetterArt` 支持的字符为 A-Z、0-9、空格与常用标点（`. , ! ? ' " - _ + = : ; ( ) [ ] /`），
 小写字母会自动转为大写；传入不支持的字符时抛出 `IllegalArgumentException`。
+
+`MorseCode` 支持的字符为 A-Z、0-9 与常用标点，小写字母会自动转为大写；
+传入不支持的字符或无法识别的电码时抛出 `IllegalArgumentException`。
