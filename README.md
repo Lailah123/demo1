@@ -88,4 +88,4 @@ String table = TextTable.render(
 ```
 
 `LetterArt` 支持的字符为 A-Z、0-9、空格与常用标点（`. , ! ? ' " - _ + = : ; ( ) [ ] /`），
-小写字母会自动转为大写；传入不支持的字符时抛出 `IllegalArgumentException`。
+小写字母会自动转为大写；传入不支持的字符时抛出 `IllegalArgumentException`。123123
