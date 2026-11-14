@@ -30,6 +30,7 @@ mvn package
 | `AsciiArt` | 图片转 ASCII 字符画（纯文本 / 彩色 HTML / 终端 ANSI） |
 | `LetterArt` | 字母转字符艺术字（A-Z、0-9 与常用标点，5 行点阵 banner） |
 | `TextTable` | 文本表格渲染（中英文混排对齐、逐列对齐方式） |
+| `MazeArt` | ASCII 迷宫生成与求解（完美迷宫 + BFS 最短路径） |
 
 ### 使用示例
 
